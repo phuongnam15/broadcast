@@ -38,38 +38,43 @@
                         </div>
                     </div>
                     <div class="inbox_chat">
-                        
-                        <div v-for="user in users" class="chat_list">
-                            <div class="chat_people">
-                                <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png"
-                                        alt="sunil"> </div>
-                                <div class="chat_ib">
-                                    <h5>@{{user.name}}<span class="chat_date">Dec 25</span></h5>
+                        @if (auth()->user())             
+                            <div v-for="user in users" class="chat_list">
+                                <div class="chat_people">
+                                    <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png"
+                                            alt="sunil"> </div>
+                                    <div class="chat_ib">
+                                        <h5>@{{user.name}}<span class="chat_date">Dec 25</span></h5>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
                 <div class="mesgs">
                     <div class="msg_history">
-                        <div v-for="message in messages">
-                            <div v-if="message.user.id !== userId" class="incoming_msg">
-                                <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png"
-                                        alt="sunil"> </div>
-                                <div class="received_msg">
-                                    <div class="received_withd_msg">
-                                        <p>@{{message.message}}</p>
-                                        <span class="time_date"> 11:01 AM | June 9</span>
+                        @if (auth()->user())
+                            <div v-if="messages.length > 0">
+                                <div v-for="message in messages">
+                                    <div v-if="message.user.id !== userId" class="incoming_msg">
+                                        <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png"
+                                                alt="sunil"> </div>
+                                        <div class="received_msg">
+                                            <div class="received_withd_msg">
+                                                <p>@{{message.message}}</p>
+                                                <span class="time_date"> 11:01 AM | June 9</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-else class="outgoing_msg">
+                                        <div class="sent_msg">
+                                            <p>@{{message.message}}</p>
+                                            <span class="time_date"> 11:01 AM | June 9</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div v-else class="outgoing_msg">
-                                <div class="sent_msg">
-                                    <p>@{{message.message}}</p>
-                                    <span class="time_date"> 11:01 AM | June 9</span>
-                                </div>
-                            </div>
-                        </div>
+                        @endif
                     </div>
                     <div class="type_msg">
                         <div class="input_msg_write">
@@ -93,7 +98,7 @@
             el: ".container",
             data() {
                 return {
-                    userId: {{ auth()->id() }},
+                    userId: {{ auth()->id() ?? "" }},
                     message: "",
                     users: [],
                     messages: [],
@@ -116,6 +121,13 @@
                 .listen("MessageSent", (event) => {
                     this.messages.push(event);
                 });
+                axios.get('/get-message')
+                .then(response => {
+                    this.messages = response.data;
+                })
+                .catch(error => {
+                    console.log(error)
+                })
             }
         });
     </script>
